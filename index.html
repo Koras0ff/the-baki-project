@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bâkî Manuscript Viewer</title>
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────────────────────────── */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      line-height: 1.6;
+      padding: 20px;
+    }
+    a {
+      color: #007bff;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* ─── Container ─────────────────────────────────────────────────────────────── */
+    .container {
+    max-width: 96vw;           /* Sayfa genişliğinin %96'sı */
+    margin: 0 auto;
+    padding: 0 1.5vw;          /* Sağ ve solda biraz boşluk bırak */
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+  }
+    header {
+      background: #3b3b98;
+      color: #fff;
+      padding: 30px 20px;
+      text-align: center;
+    }
+    header h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    header p.subtitle {
+      font-size: 1rem;
+      opacity: 0.9;
+    }
+
+    /* ─── Description Card ──────────────────────────────────────────────────── */
+    .description-card {
+      padding: 16px 20px;
+      border-bottom: 1px solid #ececec;
+    }
+    .description-card p {
+      margin-bottom: 1em;
+      color: #444;
+    }
+    .description-card details {
+      background: #fafafa;
+      border: 1px solid #ececec;
+      border-radius: 4px;
+      padding: 10px 15px;
+      margin-top: 10px;
+    }
+    .description-card summary {
+      font-weight: bold;
+      cursor: pointer;
+      color: #3b3b98;
+    }
+    .description-card summary::-webkit-details-marker {
+      display: none;
+    }
+    .description-card summary:after {
+      content: " ▶";
+      font-size: 0.9em;
+    }
+    .description-card details[open] summary:after {
+      content: " ▼";
+    }
+    .description-card ul {
+      margin-left: 20px;
+      margin-bottom: 1em;
+    }
+    .description-card li {
+      margin-bottom: 0.5em;
+      list-style: disc;
+    }
+
+    /* ─── Selection & Iframe ───────────────────────────────────────────────── */
+    .viewer-section {
+      padding: 20px;
+    }
+    .viewer-section label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #555;
+    }
+    .viewer-section select {
+      width: 100%;
+      max-width: 100%;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      transition: border-color 0.2s;
+    }
+    .viewer-section select:focus {
+      border-color: #3b3b98;
+      outline: none;
+    }
+    .viewer-section iframe {
+      width: 100%;
+      height: 75vh;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    /* ─── Footer ──────────────────────────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 15px 0;
+      font-size: 0.9rem;
+      color: #777;
+      background: #fafafa;
+      border-top: 1px solid #ececec;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- ─── Header ──────────────────────────────────────────────────────────────── -->
+    <header>
+      <h1>Bâkî Yazma Vitrini</h1>
+      <p class="subtitle">Divan şairi Bâkî’nin 11 şiirinin 8 farklı nüsha üzerindeki dizin uyumlamaları</p>
+    </header>
+
+    <!-- ─── Description / Açıklama ──────────────────────────────────────────────── -->
+    <section class="description-card">
+      <!-- Türkçe Açıklama -->
+      <p>
+        Bu arayüz, Dîvân şairi Bâḳî’ye (1526/27–1600) ait 8 farklı el yazmasından derlenmiş toplam 11 şiirin satır seviyesinde hizalanmalarını içerir. 
+        Kullanıcılar, aynı “çekirdek şiir”in farklı nüshalardaki varyant dizelerini karşılaştırabilir ve aralarındaki farklılıkları inceleyebilir.
+      </p>
+      <ul>
+        <li>Her “çekirdek şiir” öncelikle <i>TF-IDF</i> skorlarına göre küme haline getirilmiştir.</li>
+        <li>Her bir şiir, bir sütunda sunulmaktadır. Her bir şiirin başında eserin bibliografik özelliklerinin yanı sıra şiir için temel istatistikî bilgiler de mevcuttur.</li>
+        <li>Nüshalar arasında <i>bigram</i> seviyesinde hesaplanan benzerlik değerlerini, her bir şiirin başında görebilirsiniz. Burada şiire en çok ve en az benzeyen şiirleri ve benzerlik oranlarını görebilirsiniz.</li>
+        <li>Uyguladığınız filtrelerden sonra ekranda kalan şiirler arasındaki benzerliği tekrardan hesaplamak için ekranın üstünde bulunan "İstatistikleri Gizle"ye basıp ardından tekrardan "İstatistikleri Göster"e basabilirsiniz.</li>
+        <li>“Farkları Göster” düğmesi, kelime düzeyinde çoğunluk/azınlık varyantlarını vurgular (çoğunluk yeşil, azınlık sarı).</li>
+        <li>Belirli nüshalara, tarih aralığına, müstensih adına ve belirli bir ifade veya kelime üzerinden filtreleme yapabilirsiniz.</li>
+      </ul>
+
+      <!-- İngilizce Açıklama (toggle arkasında saklı) -->
+      <details>
+        <summary>Click to see English</summary>
+        <p>
+          This interface displays line-by-line alignments of 11 poems coming from 8 different manuscripts of the Divan poet Bâḳî (1526/27–1600). 
+          Users can compare how individual lines of the same “core poem” appear in various manuscripts and inspect the textual variants.
+        </p>
+        <ul>
+          <li>Each “core poem” was clustered based on TF-IDF scores.</li>
+          <li>Each poem is presented in its own column. At the top of each poem, alongside the work’s bibliographic details, basic statistical information about the poem is also provided.</li>
+          <li>You can view the bigram-based similarity between manuscripts at the top of each poem. Here, you can see which poems are most and least similar, along with their similarity percentages.</li>
+          <li>To recalculate the similarity among the poems that remain on the screen after applying filters, click “Hide Statistics” at the top of the screen and then click “Show Statistics” again.</li>
+          <li>Clicking “Show Differences” highlights majority/minority variants at the word level (majority in green, minority in yellow).</li>
+          <li>You can filter by specific manuscripts or by date range.</li>
+        </ul>
+      </details>
+    </section>
+
+    <!-- ─── Viewer Section ────────────────────────────────────────────────────── -->
+    <section class="viewer-section">
+      <label for="fileSelect">Bir şiir kümesini seçin / Choose a poem cluster:</label>
+      <select id="fileSelect">
+        <!-- JS tarafından doldurulacak -->
+      </select>
+
+      <iframe id="viewer" src="" frameborder="0"></iframe>
+    </section>
+
+    <!-- ─── Footer ───────────────────────────────────────────────────────────────── -->
+    <footer>
+      2025 | Bâkî Manuscript Viewer
+    </footer>
+  </div>
+
+  <script>
+    // ─── Poem Cluster Dosyaları ─────────────────────────────────────────────────
+    // Eğer 34 dosyanız varsa: file1.html ➔ file34.html
+    const files = [
+      'html_files/file1.html',
+      'html_files/file22.html'
+    ];
+    // <select> menüyü doldur
+    const sel = document.getElementById('fileSelect');
+    files.forEach((path, index) => {
+      const opt = document.createElement('option');
+      opt.value = path;
+      opt.text = `Şiir Kümesi ${index + 1} / Poem Cluster ${index + 1}`;
+      sel.appendChild(opt);
+    });
+
+    // Seçime tepki: iframe içeriğini güncelle & kaydır
+    sel.addEventListener('change', () => {
+      const viewer = document.getElementById('viewer');
+      viewer.src = sel.value;
+      viewer.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Sayfa yüklendiğinde ilk dosyayı göster
+    window.addEventListener('DOMContentLoaded', () => {
+      if (files.length) {
+        sel.value = files[0];
+        document.getElementById('viewer').src = files[0];
+      }
+    });
+  </script>
+</body>
+</html>
